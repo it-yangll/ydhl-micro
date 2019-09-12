@@ -1,0 +1,22 @@
+{
+  "groups": [
+    {
+      "name": "white",
+      "type": "com.ydhl.micro.gateway.properties.ConfigProperties",
+      "sourceType": "com.ydhl.micro.gateway.properties.ConfigProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "white.list",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.ydhl.micro.gateway.properties.ConfigProperties"
+    },
+    {
+      "name": "white.non-log",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.ydhl.micro.gateway.properties.ConfigProperties"
+    }
+  ],
+  "hints": []
+}

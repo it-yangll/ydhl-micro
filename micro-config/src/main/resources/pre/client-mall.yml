@@ -1,0 +1,42 @@
+server:
+  port: 20003
+
+spring:
+  data:
+    elasticsearch:
+      #节点名字，默认elasticsearch
+      cluster-name: elasticsearch
+      #节点地址，多个节点用逗号隔开 配置服务器需要改成服务器ip
+      cluster-nodes: 10.2.0.91:9300
+      #spring.data.elasticsearch.local=false
+      repositories:
+        enable: true
+  redis:
+    #数据库索引
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password:
+    jedis:
+      pool:
+        #最大连接数
+        max-active: 8
+        #最大阻塞等待时间(负数表示没限制)
+        max-wait: -1
+        #最大空闲
+        max-idle: 8
+        #最小空闲
+        min-idle: 0
+    timeout: 10000
+
+welcome: client-mall-pre
+
+logging:
+  config: classpath:pre-log.xml
+
+#静态资源访问路径
+upload:
+  # 静态资源上传路径
+  dir: /u01/app/web/files/
+  # 静态资源访问路径
+  url: http://minisht.helichina.com/files/

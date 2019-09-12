@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="client-admin" />
+        <module name="micro-api" />
+        <module name="micro-base" />
+        <module name="micro-config" />
+        <module name="micro-core" />
+        <module name="micro-eureka" />
+        <module name="micro-gateway" />
+        <module name="mybatis-generator" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>

@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: micro-gateway
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: micro-config
+      profile: default
+      username: admin
+      password: 123456
+
+eureka:
+  instance:
+    hostname: localhost
+    metadata-map:
+      user.name: "admin"
+      user.password: "123456"
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.metadata-map.user.name}:${eureka.instance.metadata-map.user.password}@${eureka.instance.hostname}:8765/eureka/

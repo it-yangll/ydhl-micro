@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: micro-eureka
+  security:
+    user:
+      name: admin
+      password: 123456
+
+server:
+  port: 8765
+
+eureka:
+  instance:
+    hostname: localhost
+  server:
+    renewal-percent-threshold: 0.7
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+    serviceUrl:
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@${eureka.instance.hostname}:${server.port}/eureka/
+
+

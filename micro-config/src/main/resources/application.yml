@@ -1,0 +1,29 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: micro-config
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/@env@
+  security:
+    user:
+      name: admin
+      password: 123456
+
+eureka:
+  instance:
+    hostname: localhost
+    #部署服务器ip
+    #hostname: 10.2.0.91
+    metadata-map:
+      user.name: "admin"
+      user.password: "123456"
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.metadata-map.user.name}:${eureka.instance.metadata-map.user.password}@${eureka.instance.hostname}:8765/eureka/

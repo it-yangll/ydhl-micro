@@ -1,0 +1,49 @@
+server:
+  tomcat:
+    max-swallow-size: 1000MB
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: client-admin
+  jackson:
+    date-format: 'yyyy-MM-dd HH:mm:ss'
+    time-zone: GMT+8
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: micro-config
+      profile: default
+      username: admin
+      password: 123456
+
+eureka:
+  instance:
+    hostname: localhost
+    metadata-map:
+      user.name: "admin"
+      user.password: "123456"
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.metadata-map.user.name}:${eureka.instance.metadata-map.user.password}@${eureka.instance.hostname}:8765/eureka/
+
+feign:
+  hystrix:
+    enabled: true
+
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          strategy: SEMAPHORE
+          thread:
+            timeoutInMilliseconds: 200000
+
+#ribbon的超时时间
+ribbon:
+  ReadTimeout: 100000
+  ConnectTimeout: 20000

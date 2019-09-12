@@ -1,0 +1,53 @@
+server:
+  port: 8085
+
+welcome: micro-gateway-dev
+
+logging:
+  config: classpath:dev-log.xml
+
+spring:
+  redis:
+    #数据库索引
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password:
+    jedis:
+      pool:
+        #最大连接数
+        max-active: 8
+        #最大阻塞等待时间(负数表示没限制)
+        max-wait: -1
+        #最大空闲
+        max-idle: 8
+        #最小空闲
+        min-idle: 0
+    timeout: 10000
+  cloud:
+    gateway:
+      routes:
+        - id: admin
+          uri: lb://client-admin
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - StripPrefix= 2
+        - id: mall
+          uri: lb://client-mall
+          predicates:
+            - Path=/api/mall/**
+          filters:
+            - StripPrefix= 2
+        - id: liteapp
+          uri: lb://client-liteapp
+          predicates:
+            - Path=/api/liteapp/**
+          filters:
+            - StripPrefix= 2
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+token_exp_time: 2592000
