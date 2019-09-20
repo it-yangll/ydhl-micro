@@ -10,6 +10,7 @@ import com.ydhl.micro.api.dto.admin.sys.dict.ResponseDicitemDTO;
 import com.ydhl.micro.api.dto.admin.sys.resource.ResponseResourceDTO;
 import com.ydhl.micro.api.dto.admin.sys.role.ResponseRoleDTO;
 import com.ydhl.micro.api.dto.liteapp.member.WxCode2SessionDTO;
+import com.ydhl.micro.api.dto.liteapp.weixin.WXSecretDto;
 import com.ydhl.micro.api.enumcode.CodeEnumClass;
 import com.ydhl.micro.api.enumcode.GlobalCodeEnum;
 import com.ydhl.micro.api.enumcode.consts.CaptchaMoudleEnum;
@@ -115,6 +116,19 @@ public class CacheHelper {
      **/
     public void saveWxSession(String openId, WxCode2SessionDTO wxCode2SessionDTO, long tokenExpTime) {
         stringRedisTemplate.opsForValue().set(RedisKeyConst.getWxSessionKey(openId), JSONObject.toJSONString(wxCode2SessionDTO), tokenExpTime, TimeUnit.SECONDS);
+    }
+
+    /**
+     * @param openId            : 微信openId
+     * @param wxSecretDto : 微信登录凭证
+     * @param tokenExpTime      :失效时间（秒）
+     * @return void :
+     * @Description //保存微信登录凭证
+     * @Author yangll
+     * @Date 2019-9-10 11:44:53
+     **/
+    public void saveWXSession(String openId, WXSecretDto wxSecretDto, long tokenExpTime) {
+        stringRedisTemplate.opsForValue().set(RedisKeyConst.getWxSessionKey(openId), JSONObject.toJSONString(wxSecretDto), tokenExpTime, TimeUnit.SECONDS);
     }
 
     /**

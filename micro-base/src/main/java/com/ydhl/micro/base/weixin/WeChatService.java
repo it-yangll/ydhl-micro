@@ -1,11 +1,9 @@
 package com.ydhl.micro.base.weixin;
 
-import com.ydhl.micro.api.dto.admin.sys.login.ResponseLoginDTO;
 import com.ydhl.micro.api.dto.liteapp.member.ResponseWxSessionDTO;
 import com.ydhl.micro.api.dto.mall.member.CaptchaDTO;
-import com.ydhl.micro.api.dto.mall.member.LoginMallDTO;
 import com.ydhl.micro.base.weixin.dto.BindWxDTO;
-import com.ydhl.micro.base.weixin.dto.WxLoginAppDTO;
+import org.springframework.http.ResponseEntity;
 
 /**
  * @ClassName WeChatService
@@ -27,6 +25,9 @@ public interface WeChatService {
 
     /** 驾驶舱发送验证码 */
     void captcha(CaptchaDTO dto);
+
+    /** 获取微信Token */
+    ResponseEntity<String> getAccountToken();
 
 
 }
