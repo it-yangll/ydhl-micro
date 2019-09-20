@@ -12,11 +12,10 @@
     </parent>
 
     <artifactId>micro-api</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <name>micro-api</name>
     <description>微服务接口声明</description>
 
     <dependencies>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

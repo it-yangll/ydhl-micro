@@ -5,10 +5,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
+/*import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.FieldType;*/
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -111,7 +111,7 @@ public class GoodsIdx {
     private String tenureofuseDesc;
 
     @ApiModelProperty(value = "轮胎")
-    @Field(type = FieldType.Keyword)
+    //@Field(type = FieldType.Keyword)
     private String tyre;
 
     @ApiModelProperty(value = "轮胎描述")
@@ -135,7 +135,7 @@ public class GoodsIdx {
     private String workStateDesc;
 
     @ApiModelProperty(value = "货叉长度")
-    @Field(type = FieldType.Keyword)
+    //@Field(type = FieldType.Keyword)
     private String forkLength;
 
     @ApiModelProperty(value = "货叉长度描述")

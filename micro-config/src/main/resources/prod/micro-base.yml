@@ -2,15 +2,6 @@ server:
   port: 30002
 
 spring:
-  data:
-    elasticsearch:
-      #节点名字，默认elasticsearch
-      cluster-name: elasticsearch
-      #节点地址，多个节点用逗号隔开
-      cluster-nodes: 127.0.0.1:9300
-      #spring.data.elasticsearch.local=false
-      repositories:
-        enable: true
   jpa:
     generate-ddl: false
     show-sql: true

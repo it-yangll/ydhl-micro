@@ -2,15 +2,6 @@ server:
   port: 30004
 
 spring:
-  data:
-    elasticsearch:
-      #节点名字，默认elasticsearch
-      cluster-name: elasticsearch
-      #节点地址，多个节点用逗号隔开
-      cluster-nodes: 127.0.0.1:9300
-      #spring.data.elasticsearch.local=false
-      repositories:
-        enable: true
   jpa:
     generate-ddl: false
     show-sql: true
@@ -18,9 +9,9 @@ spring:
       ddl-auto: none
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://rm-uf6t5d12zma8fb1m00o.mysql.rds.aliyuncs.com:3306/heli_mall?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: heli
-    password: 123456
+    url: jdbc:mysql://42.159.10.69:13306/micro_test?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: Ccm12345.
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       #初始化大小
