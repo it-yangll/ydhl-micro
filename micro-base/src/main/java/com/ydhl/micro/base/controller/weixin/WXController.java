@@ -26,5 +26,10 @@ public class WXController implements WeiXinApi {
         return HttpResultDTO.ok(weChatService.getAccountToken());
     }
 
+    @Override
+    public HttpResultDTO redirectUriCode(String code) {
+        return HttpResultDTO.ok(weChatService.redirectUriCode(code));
+    }
+
 
 }

@@ -18,4 +18,9 @@ public class WeiXinApiClientFallback implements WeiXinApiClient {
     public HttpResultDTO gtewxtk() {
         return HttpResultDTO.fail(GlobalCodeEnum.ERR_SERVER_UNAVAILABLE);
     }
+
+    @Override
+    public HttpResultDTO redirectUriCode(String code) {
+       return HttpResultDTO.fail(GlobalCodeEnum.ERR_SERVER_UNAVAILABLE);
+    }
 }

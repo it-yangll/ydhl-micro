@@ -11,6 +11,7 @@ import com.ydhl.micro.api.enumcode.mall.MallCodeEnum;
 import com.ydhl.micro.api.exception.SystemRuntimeException;
 import com.ydhl.micro.base.weixin.WeChatService;
 import com.ydhl.micro.base.weixin.dto.BindWxDTO;
+import com.ydhl.micro.base.weixin.util.WxConfigUtil;
 import com.ydhl.micro.core.consts.RedisKeyConst;
 import com.ydhl.micro.core.util.CacheHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
 
 
 /**
@@ -39,6 +41,8 @@ public class WeChatServiceImpl implements WeChatService {
     private CacheHelper cacheHelper;
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private WxConfigUtil wxConfigUtil;
 
     @Value("${token_exp_time}")
     private long tokenExpTime;
@@ -69,6 +73,11 @@ public class WeChatServiceImpl implements WeChatService {
         //微信登录凭证放入redis
         cacheHelper.saveWXSession(WXSecretDto.WX_CACHETOKEN_NAME, wxSecretDto, tokenExpTime);
         return wxResponse;
+    }
+
+    @Override
+    public String redirectUriCode(String code) {
+        return  wxConfigUtil.redirectUriCode(code);
     }
 
 

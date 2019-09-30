@@ -4,7 +4,6 @@ import com.ydhl.micro.api.dto.common.HttpResultDTO;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-
 /**
  * @ClassName AuthenticationApi
  * @Description TODO
@@ -17,5 +16,12 @@ public interface WeiXinApi {
     /** 获取微信Token */
     @RequestMapping(value = "gtewxtk", method = RequestMethod.GET)
     HttpResultDTO gtewxtk();
+
+
+    /** 获取用户权限 */
+    @RequestMapping(value = "redirectUriCode", method = RequestMethod.GET)
+    HttpResultDTO redirectUriCode(String code);
+
+
 
 }

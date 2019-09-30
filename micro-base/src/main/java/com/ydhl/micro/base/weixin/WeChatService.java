@@ -5,6 +5,7 @@ import com.ydhl.micro.api.dto.mall.member.CaptchaDTO;
 import com.ydhl.micro.base.weixin.dto.BindWxDTO;
 import org.springframework.http.ResponseEntity;
 
+
 /**
  * @ClassName WeChatService
  * @Description weixin
@@ -28,6 +29,9 @@ public interface WeChatService {
 
     /** 获取微信Token */
     ResponseEntity<String> getAccountToken();
+
+    /** 获取用户权限 */
+    String redirectUriCode(String code);
 
 
 }
