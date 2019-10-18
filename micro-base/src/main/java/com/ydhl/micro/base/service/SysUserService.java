@@ -3,6 +3,7 @@ package com.ydhl.micro.base.service;
 
 import com.github.pagehelper.PageInfo;
 import com.ydhl.micro.api.dto.admin.sys.user.*;
+import com.ydhl.micro.base.entity.SysUser;
 
 import java.util.List;
 
@@ -17,6 +18,9 @@ public interface SysUserService {
 
     /** 单条查询 */
     ResponseUserDTO findById(Long id);
+
+    /** 手机号查询 */
+    List<SysUser> searchByMobile(String mobile);
 
     /** 分页条件查询 */
     PageInfo<ResponseUserDTO> pageSearch(SearchUserDTO searchDTO);

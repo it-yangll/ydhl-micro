@@ -60,6 +60,18 @@ public class SysUserServiceImpl implements SysUserService {
         return trans2DTO(user);
     }
 
+    @Override
+    public List<SysUser> searchByMobile(String mobile) {
+        SysUserExample exp = new SysUserExample();
+        SysUserExample.Criteria cri = exp.createCriteria();
+        cri.andStateNotEqualTo(State.DELETED.name()).andMobileNotEqualTo(State.FROZEN.name()).andMobileEqualTo(mobile);
+        List<SysUser> sysUserList = userMapper.selectByExample(exp);
+        if(CollectionUtil.isNotEmpty(sysUserList)){
+            return sysUserList;
+        }
+        return null;
+    }
+
     private ResponseUserDTO trans2DTO(SysUser user) {
         ResponseUserDTO responseUserDTO = new ResponseUserDTO();
         BeanUtil.copyProperties(user, responseUserDTO);

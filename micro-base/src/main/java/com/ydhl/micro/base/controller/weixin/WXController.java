@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+
 /**
  * @ClassName AuthenticationController
  * @Description TODO
@@ -22,14 +23,10 @@ public class WXController implements WeiXinApi {
     private WeChatService weChatService;
 
     @Override
-    public HttpResultDTO gtewxtk() {
-        return HttpResultDTO.ok(weChatService.getAccountToken());
-    }
+    public HttpResultDTO getAccountCode() { return HttpResultDTO.ok(weChatService.redirectWXAuthUrl()); }
 
     @Override
-    public HttpResultDTO redirectUriCode(String code) {
-        return HttpResultDTO.ok(weChatService.redirectUriCode(code));
-    }
+    public HttpResultDTO getWXUserInfo(String code, String state) { return HttpResultDTO.ok(weChatService.getWXUserInfo(code,state)); }
 
 
 }

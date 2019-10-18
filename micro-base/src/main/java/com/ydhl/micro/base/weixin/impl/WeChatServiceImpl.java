@@ -1,21 +1,36 @@
 package com.ydhl.micro.base.weixin.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.ydhl.micro.api.dto.admin.sys.login.ResponseLoginDTO;
+import com.ydhl.micro.api.dto.admin.sys.user.CreateUserDTO;
 import com.ydhl.micro.api.dto.liteapp.member.ResponseWxSessionDTO;
 import com.ydhl.micro.api.dto.liteapp.member.WxCode2SessionDTO;
-import com.ydhl.micro.api.dto.liteapp.weixin.WXSecretDto;
-import com.ydhl.micro.api.dto.mall.member.CaptchaDTO;
 import com.ydhl.micro.api.enumcode.GlobalCodeEnum;
+import com.ydhl.micro.api.enumcode.admin.AdminCodeEnum;
+import com.ydhl.micro.api.enumcode.consts.AuthType;
 import com.ydhl.micro.api.enumcode.consts.CaptchaMoudleEnum;
+import com.ydhl.micro.api.enumcode.consts.LoginType;
+import com.ydhl.micro.api.enumcode.consts.UserType;
 import com.ydhl.micro.api.enumcode.mall.MallCodeEnum;
 import com.ydhl.micro.api.exception.SystemRuntimeException;
+import com.ydhl.micro.base.dao.auto.SysAuthRoleMapper;
+import com.ydhl.micro.base.dao.auto.SysResourceMapper;
+import com.ydhl.micro.base.dao.auto.SysRoleMapper;
+import com.ydhl.micro.base.dao.auto.SysRoleResourceMapper;
+import com.ydhl.micro.base.entity.*;
+import com.ydhl.micro.base.service.SysUserService;
 import com.ydhl.micro.base.weixin.WeChatService;
+import com.ydhl.micro.base.weixin.dto.BeanWxDTO;
 import com.ydhl.micro.base.weixin.dto.BindWxDTO;
 import com.ydhl.micro.base.weixin.util.WxConfigUtil;
-import com.ydhl.micro.core.consts.RedisKeyConst;
+import com.ydhl.micro.core.security.JwtBody;
+import com.ydhl.micro.core.security.JwtUtil;
 import com.ydhl.micro.core.util.CacheHelper;
+import com.ydhl.micro.core.util.IpUtil;
+import com.ydhl.micro.core.util.PayUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +39,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -37,49 +57,105 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class WeChatServiceImpl implements WeChatService {
 
+    public static final String WX_USER_REMARK = "微信授权访问用户";
+
     @Autowired
     private CacheHelper cacheHelper;
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
     private WxConfigUtil wxConfigUtil;
+    @Autowired
+    private SysAuthRoleMapper authRoleMapper;
+    @Autowired
+    private SysRoleResourceMapper roleResourceMapper;
+    @Autowired
+    private SysRoleMapper roleMapper;
+    @Autowired
+    private SysResourceMapper resourceMapper;
+    @Autowired
+    private SysUserService sysUserService;
 
     @Value("${token_exp_time}")
     private long tokenExpTime;
 
-    @Value("${wx.code2sessionUrl}")
+    @Value("${wx.code2session}")
     private String wxCode2SessionUrl;
 
     @Value("${wx.litewx.corpid}")
     private String wxCorpid;
 
+    @Value("${wx.litewx.agentId}")
+    private String agentId;
+
     @Value("${wx.litewx.corpsecret}")
     private String wxSecret;
 
+    @Value("${wx.oauthCode}")
+    private String oauthCodeUrl;
 
-    public ResponseEntity<String> getAccountToken() {
-        ResponseEntity<String> wxResponse = restTemplate.getForEntity(wxCode2SessionUrl,String.class,wxCorpid,wxSecret);
+    @Value("${wx.encod}")
+    private String encodUrl;
+
+    @Override
+    public String redirectWXAuthUrl() {
+        return wxConfigUtil.redirectWXAuthUrl();
+    }
+
+    @Override
+    public ResponseLoginDTO getWXUserInfo(String code, String state) {
+        ResponseEntity<String> accountCode = wxConfigUtil.getWxUserInfo(code,state);
+        if (!accountCode.getStatusCode().equals(HttpStatus.OK)) {
+            throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN));
+        }
+        String body = accountCode.getBody();
+        BeanWxDTO.UserInfo userInfo = BeanWxDTO.getUserInfoBody(body);
+        List<SysUser> sysUserList = sysUserService.searchByMobile(userInfo.getMobile());
+        if(CollectionUtil.isNotEmpty(sysUserList)){
+            ResponseLoginDTO result = new ResponseLoginDTO();
+            BeanUtil.copyProperties(sysUserList.get(0), result);
+            result.setAccessToken(JwtUtil.buildJWT(JwtBody.createJwtBody(UUID.randomUUID().toString(), tokenExpTime, IpUtil.getIpAddr(), LoginType.ADMIN, UserType.valueOf(sysUserList.get(0).getUserType()), sysUserList.get(0).getUserName(), sysUserList.get(0).getId(), sysUserList.get(0).getName())));
+            result.setPermissions(getUserPermissions(sysUserList.get(0)));
+            result.setRoles(getRoles(sysUserList.get(0)));
+            return result;
+        }else{
+            throw new SystemRuntimeException(AdminCodeEnum.ERR_WX_PERMISSION_NOT_OPEN, cacheHelper.msgTemplate(AdminCodeEnum.ERR_WX_PERMISSION_NOT_OPEN));
+        }
+    }
+
+
+
+
+    public void createBeanUser(BeanWxDTO.UserInfo userInfo){
+        if(userInfo == null){
+            throw new SystemRuntimeException(AdminCodeEnum.ERR_WX_USER_REPEAT, cacheHelper.msgTemplate(AdminCodeEnum.ERR_WX_USER_REPEAT));
+        }
+        CreateUserDTO userDto = new CreateUserDTO();
+        userDto.setUserName(userInfo.getUserid());
+        userDto.setName(userInfo.getName());
+        userDto.setMobile(userInfo.getMobile());
+        userDto.setLogo(userInfo.getAvatar());
+        userDto.setMail(userInfo.getEmail());
+        userDto.setRemark(WX_USER_REMARK);
+        sysUserService.create(userDto);
+    }
+
+
+
+
+
+    @Override
+    public ResponseEntity<String> getAccountCode() throws UnsupportedEncodingException {
+        ResponseEntity<String> wxResponse = restTemplate.getForEntity(oauthCodeUrl,String.class,wxCorpid,URLEncoder.encode(encodUrl,"UTF-8"),agentId,PayUtil.createCode(6));
 
         if (!wxResponse.getStatusCode().equals(HttpStatus.OK)) {
             throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN));
         }
-        WXSecretDto wxSecretDto = JSONObject.parseObject(wxResponse.getBody(),WXSecretDto.class);
-
         log.info("微信登录凭证：{}", wxResponse);
-        if (wxSecretDto.getErrcode() > 0) {
-            throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_CODE2SESSION, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_CODE2SESSION));
-        }
-
         //微信登录凭证放入redis
-        cacheHelper.saveWXSession(WXSecretDto.WX_CACHETOKEN_NAME, wxSecretDto, tokenExpTime);
+        //cacheHelper.saveWXBeanString(WXSecretDto.WX_CACHETOKEN_NAME, wxSecretDto, tokenExpTime);
         return wxResponse;
     }
-
-    @Override
-    public String redirectUriCode(String code) {
-        return  wxConfigUtil.redirectUriCode(code);
-    }
-
 
     @Override
     public ResponseWxSessionDTO bindWx(BindWxDTO dto) {
@@ -110,43 +186,94 @@ public class WeChatServiceImpl implements WeChatService {
     }
 
 
-    @Override
-    public void captcha(CaptchaDTO dto) {
-        //1.生成验证码
-        String captcha = RandomStringUtils.randomNumeric(1);
 
-        //2.校验验证码发送间隔和发送次数
-        String captchaCache = cacheHelper.getMobileCaptcha(dto.getMobile(), dto.getMoudle());
-        if (StringUtils.isNotBlank(captchaCache)) {
-            Long expireTime = cacheHelper.getMobileCaptchaExpire(dto.getMobile(), dto.getMoudle());
-            int survivalTime = 1 * 60;
-            if ((expireTime + 60) > survivalTime) {
-                throw new SystemRuntimeException(GlobalCodeEnum.ERR_COMMON, cacheHelper.msgTemplate("ERR_SMS_INTERVAL", "发送短信过于频繁，请稍后重试"));
-            }
-        }
-
-        String key = RedisKeyConst.getMobileSmsSequenceKey(dto.getMobile());
-        String sendCout = cacheHelper.getStringValue(key);
-        if (StringUtils.isBlank(sendCout)) {
-            cacheHelper.setStringValue(key, "1", 86400);
+    public List<String> getUserPermissions(SysUser user) {
+        List<String> result = new ArrayList<>();
+        if (StringUtils.equalsIgnoreCase(user.getUserType(), UserType.ADMIN.name())) {
+            result.add("*");
         } else {
-            if (cacheHelper.increment(key) > 1) {
-                throw new SystemRuntimeException(GlobalCodeEnum.ERR_COMMON, cacheHelper.msgTemplate("ERR_SMS_TOO_MANY", "该手机【{0}】今天发送的短信次数已超过{1}条", dto.getMobile(), 1));
+            List<Long> userRoleIds = getUserRoleIds(user);
+            if (CollectionUtil.isNotEmpty(userRoleIds)) {
+                SysRoleExample exp = new SysRoleExample();
+                exp.createCriteria().andIdIn(userRoleIds).andAvailableEqualTo(true);
+                List<SysRole> roles = roleMapper.selectByExample(exp);
+                if (CollectionUtil.isNotEmpty(roles)) {
+                    List<Long> roleIds = new ArrayList<>();
+                    roles.forEach(r -> {
+                        roleIds.add(r.getId());
+                    });
+
+                    List<Long> userResourceIds = getResourceByRoles(roleIds);
+                    if (CollectionUtil.isNotEmpty(userResourceIds)) {
+                        SysResourceExample exp1 = new SysResourceExample();
+                        exp1.createCriteria().andIdIn(userResourceIds).andAvailableEqualTo(true);
+                        List<SysResource> resources = resourceMapper.selectByExample(exp1);
+                        if (CollectionUtil.isNotEmpty(resources)) {
+                            resources.forEach(r -> {
+                                result.add(r.getPermission());
+                            });
+                        }
+                    }
+                }
             }
         }
-
-        //3.验证码存入到redis
-        cacheHelper.saveMobileCaptcha(dto.getMobile(), dto.getMoudle(), captcha, 1);
-
-        //4.短信模板
-        String smsTemplate = cacheHelper.msgTemplate(dto.getMoudle().name(), "验证码：{0}，{1}分钟内有效", captcha, 1);
-
-        log.info("手机验证码模板：{}", smsTemplate);
-
-        //4.调用短信网关发送短信...
-       //HeliSmsHelper.sendMsg(heliLoginUrl, heliSmsUrl, heliDeviceId, heliAppId, dto.getMobile(), smsTemplate);
+        return result;
     }
 
+    public List<String> getRoles(SysUser user) {
+        List<String> result = new ArrayList<>();
+        if (StringUtils.equalsIgnoreCase(user.getUserType(), UserType.ADMIN.name())) {
+            result.add("*");
+        } else {
+            List<Long> userRoleIds = getUserRoleIds(user);
+            if (CollectionUtil.isNotEmpty(userRoleIds)) {
+                SysRoleExample exp = new SysRoleExample();
+                exp.createCriteria().andIdIn(userRoleIds).andAvailableEqualTo(true);
+                List<SysRole> roles = roleMapper.selectByExample(exp);
+                if (CollectionUtil.isNotEmpty(roles)) {
+                    roles.forEach(r -> {
+                        result.add(r.getRole());
+                    });
+                }
+            }
+        }
+        return result;
+    }
+
+    private List<Long> getUserRoleIds(SysUser user) {
+        List<Long> userRoleIds = new ArrayList<>();
+        SysAuthRoleExample exp = new SysAuthRoleExample();
+        exp.or().andAuthIdEqualTo(user.getId()).andAuthTypeEqualTo(AuthType.USER.name());
+        if (user.getDeptId() != null) {
+            exp.or().andAuthIdEqualTo(user.getDeptId()).andAuthTypeEqualTo(AuthType.DEPT.name());
+        }
+        if (user.getPostId() != null) {
+            exp.or().andAuthIdEqualTo(user.getPostId()).andAuthTypeEqualTo(AuthType.POST.name());
+        }
+        List<SysAuthRole> authRoles = authRoleMapper.selectByExample(exp);
+        if (CollectionUtil.isNotEmpty(authRoles)) {
+            authRoles.forEach(r -> {
+                userRoleIds.add(r.getRoleId());
+            });
+        }
+        return userRoleIds;
+    }
+
+    private List<Long> getResourceByRoles(List<Long> roleIds) {
+        List<Long> userResourceIds = new ArrayList<>();
+        if (CollectionUtil.isEmpty(roleIds)) {
+            return userResourceIds;
+        }
+        SysRoleResourceExample exp = new SysRoleResourceExample();
+        exp.createCriteria().andRoleIdIn(roleIds);
+        List<SysRoleResource> roleResources = roleResourceMapper.selectByExample(exp);
+        if (CollectionUtil.isNotEmpty(roleResources)) {
+            roleResources.forEach(r -> {
+                userResourceIds.add(r.getResourceId());
+            });
+        }
+        return userResourceIds;
+    }
 
 
 

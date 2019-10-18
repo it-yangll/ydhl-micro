@@ -101,6 +101,8 @@ pagehelper:
 
 wx:
   code2sessionUrl: https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={?}&corpsecret={?}
+  oauthCodeUrl: https://open.weixin.qq.com/connect/oauth2/authorize?appid={?}&redirect_uri={?}&response_type=code&scope=snsapi_base&agentid={?}&state={?}#wechat_redirect
+  encodUrl: http://m3prfr.natappfree.cc/api/admin/public/MTAuthorization
   litewx:
     agentId: 1000021
     corpid: wx6a926e35be324c15

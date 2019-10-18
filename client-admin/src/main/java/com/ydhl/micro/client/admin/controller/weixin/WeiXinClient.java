@@ -4,20 +4,18 @@ import com.ydhl.micro.api.dto.admin.sys.login.ResponseLoginDTO;
 import com.ydhl.micro.api.dto.common.HttpResultDTO;
 import com.ydhl.micro.client.admin.service.weixin.WeiXinApiClient;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.net.URLEncoder;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @ClassName AuthenticationController
@@ -33,9 +31,12 @@ public class WeiXinClient {
 
     @Autowired
     private WeiXinApiClient weiXinApiClient;
-    @Autowired
-    private RestTemplate restTemplate;
 
+    @Value("${wx.encodUrl}")
+    private String encodUrl;
+
+    @Value("${wx.litewx.corpid}")
+    private String openId;
 
     /**
      * @param  :
@@ -44,64 +45,26 @@ public class WeiXinClient {
      * @Author Ly
      * @Date 2019/3/30 14:45
      **/
-    @ApiOperation(value = "管理系统登录")
-    @RequestMapping("gtewxtk")
+    @ApiOperation(value = "获取网页跳转连接")
+    @RequestMapping("/public/gtewxtk")
     public HttpResultDTO<ResponseLoginDTO> login() {
         log.info("管理系统登录:{}");
-        return weiXinApiClient.gtewxtk();
-    }
-
-    @ApiOperation(value = "微信获取当前用户信息")
-    @RequestMapping("/public/redirectUriCode")
-    public HttpResultDTO redirectUriCode(HttpServletRequest request, HttpServletResponse response){
-        //从request里面获取code参数(当微信服务器访问回调地址的时候，会把code参数传递过来)
-        String code = request.getParameter("code");
-
-        log.info("code:",code);
-
-        String encodUrl = "http://iqvu2j.natappfree.cc/api/admin/public/MTAuthorization";
-
-        //获取code后，请求以下链接获取access_token
-        String url = "https://open.weixin.qq.com/connect/oauth2/authorize?" +
-                "appid=wx6a926e35be324c15&redirect_uri=+"+URLEncoder.encode(encodUrl)+"&" +
-                "response_type=code&" +
-                "scope=snsapi_privateinfo&" +
-                "agentid=1000021&" +
-                "state=STATE#wechat_redirect";
-
-
-
-        ResponseEntity<String> wxResponse = restTemplate.getForEntity(url,String.class);
-
-
-        log.info("wxResponse",wxResponse);
-
-
-
-        return HttpResultDTO.ok(wxResponse.getBody());
-
-
+        try {
+            return weiXinApiClient.getAccountCode();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return HttpResultDTO.error("error");
     }
 
 
-
-
+    @ApiModelProperty(value = "获取当前微信登录用户角色权限")
     @RequestMapping(value = "/public/MTAuthorization")
     @ResponseBody
     public HttpResultDTO mTAuthorization(HttpServletRequest request, HttpSession session) {
         String code= request.getParameter("code");
         String state=request.getParameter("state");
-
-        log.info("wx_code---------------------------:"+code);
-        log.info("wx_code---------------------------:"+code);
-        log.info("wx_code---------------------------:"+code);
-        log.info("wx_code---------------------------:"+code);
-        log.info("wx_code---------------------------:"+code);
-        log.info("wx_code---------------------------:"+code);
-        log.info("wx_code---------------------------:"+code);
-        log.info("wx_code---------------------------:"+code);
-
-        return HttpResultDTO.ok(code);
+        return weiXinApiClient.getWXUserInfo(code,state);
     }
 
 

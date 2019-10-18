@@ -31,3 +31,6 @@ upload:
   dir: D:\\heli\\files
   # 运营平台静态资源访问路径
   url: http://minisht.localhost.com/files/
+
+wx:
+  encodUrl: http://m3prfr.natappfree.cc/api/admin/public/MTAuthorization

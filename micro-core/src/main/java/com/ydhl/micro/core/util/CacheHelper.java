@@ -11,6 +11,7 @@ import com.ydhl.micro.api.dto.admin.sys.resource.ResponseResourceDTO;
 import com.ydhl.micro.api.dto.admin.sys.role.ResponseRoleDTO;
 import com.ydhl.micro.api.dto.liteapp.member.WxCode2SessionDTO;
 import com.ydhl.micro.api.dto.liteapp.weixin.WXSecretDto;
+import com.ydhl.micro.api.dto.liteapp.weixin.WxBeanStringSuper;
 import com.ydhl.micro.api.enumcode.CodeEnumClass;
 import com.ydhl.micro.api.enumcode.GlobalCodeEnum;
 import com.ydhl.micro.api.enumcode.consts.CaptchaMoudleEnum;
@@ -106,6 +107,21 @@ public class CacheHelper {
     }
 
     /**
+     * @param openId :微信openId
+     * @return com.ybzt.micro.api.dto.liteapp.member.WxCode2SessionDTO :
+     * @Description //获取微信登录凭证
+     * @Author yangll
+     * @Date 2019-9-10 11:44:36
+     **/
+    public WXSecretDto getWxAccessToken(String openId) {
+        String wxSecretDto = stringRedisTemplate.opsForValue().get(RedisKeyConst.getWxSessionKey(openId));
+        if (StringUtils.isBlank(wxSecretDto)) {
+            throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_CODE2SESSION, msgTemplate(GlobalCodeEnum.ERR_WX_CODE2SESSION));
+        }
+        return JSONObject.toJavaObject(JSONObject.parseObject(wxSecretDto), WXSecretDto.class);
+    }
+
+    /**
      * @param openId            : 微信openId
      * @param wxCode2SessionDTO : 微信登录凭证
      * @param tokenExpTime      :失效时间（秒）
@@ -129,6 +145,32 @@ public class CacheHelper {
      **/
     public void saveWXSession(String openId, WXSecretDto wxSecretDto, long tokenExpTime) {
         stringRedisTemplate.opsForValue().set(RedisKeyConst.getWxSessionKey(openId), JSONObject.toJSONString(wxSecretDto), tokenExpTime, TimeUnit.SECONDS);
+    }
+
+    /**
+     * @param userId            : 当前微信用户ID
+     * @param wxDto : 当前用户信息
+     * @param tokenExpTime      :失效时间（秒）
+     * @return void :
+     * @Description //保存微信登录凭证
+     * @Author yangll
+     * @Date 2019-10-17 11:28:45
+     **/
+    public void saveWXBeanString(String userId, WxBeanStringSuper wxDto, long tokenExpTime) {
+        stringRedisTemplate.opsForValue().set(RedisKeyConst.getWxSessionKey(userId), JSONObject.toJSONString(wxDto), tokenExpTime, TimeUnit.SECONDS);
+    }
+
+    /**
+     * @param userId            : 当前微信用户ID
+     * @param wxDto : 当前用户信息
+     * @param tokenExpTime      :失效时间（秒）
+     * @return void :
+     * @Description //保存微信登录凭证
+     * @Author yangll
+     * @Date 2019-10-17 11:28:45
+     **/
+    public void getWXBeanString(String userId, WxBeanStringSuper wxDto, long tokenExpTime) {
+        stringRedisTemplate.opsForValue().set(RedisKeyConst.getWxSessionKey(userId), JSONObject.toJSONString(wxDto), tokenExpTime, TimeUnit.SECONDS);
     }
 
     /**

@@ -97,3 +97,21 @@ pagehelper:
   supportMethodsArguments: false
   params: count=countSql
   returnPageInfo: check
+
+#wx
+wx:
+  #微信认证入口
+  code2session: https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={?}&corpsecret={?}
+  #静默等了地址
+  oauthCode: https://open.weixin.qq.com/connect/oauth2/authorize?appid={0}&redirect_uri={1}&response_type=code&scope=snsapi_userinfo&agentid={2}&state={3}#wechat_redirect
+  #本地回调路径
+  encod: http://3acetr.natappfree.cc/api/admin/public/MTAuthorization
+  #获取微信用户UserID
+  user:
+    oauthUserId: https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token={0}&code={1}
+    oauthUserInfo: https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token={0}&userid={1}
+  #微信基本信息
+  litewx:
+    agentId: 1000021
+    corpid: wx6a926e35be324c15
+    corpsecret: aorBy73LOiI2mWE670qLajVH8bkm0bxpv4hYBULH6Ao

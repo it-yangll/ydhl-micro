@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.ydhl.micro.api.dto.liteapp.weixin.WXSecretDto;
 import com.ydhl.micro.api.enumcode.GlobalCodeEnum;
 import com.ydhl.micro.api.exception.SystemRuntimeException;
+import com.ydhl.micro.base.weixin.dto.BeanWxDTO;
 import com.ydhl.micro.core.util.CacheHelper;
+import com.ydhl.micro.core.util.PayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,10 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.MessageFormat;
 
 /**
@@ -39,7 +39,7 @@ public class WxConfigUtil {
     @Value("${token_exp_time}")
     private long tokenExpTime;
 
-    @Value("${wx.code2sessionUrl}")
+    @Value("${wx.code2session}")
     private String wxCode2SessionUrl;
 
     @Value("${wx.litewx.corpid}")
@@ -47,6 +47,21 @@ public class WxConfigUtil {
 
     @Value("${wx.litewx.corpsecret}")
     private String wxSecret;
+
+    @Value("${wx.litewx.agentId}")
+    private String agentId;
+
+    @Value("${wx.oauthCode}")
+    private String oauthCodeUrl;
+
+    @Value("${wx.encod}")
+    private String encodUrl;
+
+    @Value("${wx.user.oauthUserId}")
+    private String oauthUserIdUrl;
+
+    @Value("${wx.user.oauthUserInfo}")
+    private String oauthUserInfoUrl;
 
     public WxConfigUtil() {
         log.info("==========================WXConfigUtil==============================");
@@ -88,7 +103,7 @@ public class WxConfigUtil {
             throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_CODE2SESSION, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_CODE2SESSION));
         }
         //微信登录凭证放入redis
-        cacheHelper.saveWXSession(WXSecretDto.WX_CACHETOKEN_NAME, wxSecretDto, tokenExpTime);
+        cacheHelper.saveWXSession(wxCorpid, wxSecretDto, tokenExpTime);
         log.info("=================================WX_AUTO========================================");
 
     }
@@ -99,37 +114,63 @@ public class WxConfigUtil {
      * @param code
      * @return
      */
-    public String redirectUriCode(String code){
-        //从request里面获取code参数(当微信服务器访问回调地址的时候，会把code参数传递过来)
-        log.info("ssssssssssssssssssssssssssssssssssssssssssssssss");
-        log.info(code);
-
-        return code;
+    public ResponseEntity<String> getWxUserInfo(String code, String state){
+        String accountCode = null;
+        WXSecretDto access_token = cacheHelper.getWxAccessToken(wxCorpid);
+        if(access_token.getErrcode() < 1){
+            accountCode = access_token.getAccess_token();
+        }else{
+            throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN));
+        }
+        //用户id获取
+        ResponseEntity<String> wxResponse = restTemplate.getForEntity(oauthUserIdUrl,String.class,accountCode,code);
+        if (!wxResponse.getStatusCode().equals(HttpStatus.OK)) {
+            throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_ACCESS_USERID_TOKEN, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_ACCESS_USERID_TOKEN));
+        }
+        BeanWxDTO userId = BeanWxDTO.getUserIdBody(wxResponse.getBody());
+        cacheHelper.saveWXBeanString(((BeanWxDTO.UserId) userId).getUserId(), userId, tokenExpTime);
+        //用户信息获取
+        ResponseEntity<String> wxResponseUserInfo = restTemplate.getForEntity(oauthUserInfoUrl, String.class,accountCode,((BeanWxDTO.UserId) userId).getUserId());
+        if (!wxResponseUserInfo.getStatusCode().equals(HttpStatus.OK)) {
+            throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_CODE2SESSION, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_CODE2SESSION));
+        }
+        return wxResponseUserInfo;
     }
-
-
-
-
-
 
 
     /**
      * 路劲归位
      * @param url
-     * @param obj
+     * @param wxCorpid
+     * @param encodUrl
+     * @param agentId
+     * @param randomCode
      * @return
      */
-    public static String newMsgTemplate(String url,Object ... obj){
-        return MessageFormat.format(url,obj);
+    public String newMsgTemplate(String url,String wxCorpid,String encodUrl,String agentId,String randomCode){
+        return MessageFormat.format(url,wxCorpid,encodUrl,agentId,randomCode);
+    }
+
+    /**
+     * 多参数路劲归位
+     * @param url
+     * @param params
+     * @return
+     */
+    public String newMsgTemplateParams(String url,Object... params){
+        return MessageFormat.format(url,params);
     }
 
 
 
-
-
-
-
-
+    public String redirectWXAuthUrl(){
+        try {
+            return newMsgTemplate(oauthCodeUrl, URLEncoder.encode(wxCorpid,"UTF-8"),URLEncoder.encode(encodUrl,"UTF-8"),URLEncoder.encode(agentId,"UTF-8"), PayUtil.createCode(6));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN));
+        }
+    }
 
 
 }

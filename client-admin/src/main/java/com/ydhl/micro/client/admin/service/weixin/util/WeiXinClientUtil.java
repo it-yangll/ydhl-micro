@@ -8,13 +8,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
+import java.io.UnsupportedEncodingException;
+
 
 /**
  * @ClassName AuthenticationController
@@ -31,7 +27,6 @@ public class WeiXinClientUtil {
     @Autowired
     private WeiXinApiClient weiXinApiClient;
 
-
     /**
      * @param  :
      * @return com.ydhl.micro.api.dto.common.ResponseDTO<com.ydhl.micro.api.dto.sys.UserDTO> :
@@ -41,22 +36,9 @@ public class WeiXinClientUtil {
      **/
     @ApiOperation(value = "管理系统登录")
     @RequestMapping("gtewxtk1")
-    public HttpResultDTO<ResponseLoginDTO> login() {
+    public HttpResultDTO<ResponseLoginDTO> login() throws UnsupportedEncodingException {
         log.info("管理系统登录:{}");
-        return weiXinApiClient.gtewxtk();
-    }
-
-    @ApiOperation(value = "微信获取当前用户信息")
-    @RequestMapping("redirectUriCode1")
-    public HttpResultDTO redirectUriCode(ServletRequest request, ServletResponse response){
-        /*HttpServletRequest req = (HttpServletRequest) request;
-        HttpServletResponse resp = (HttpServletResponse) response;
-        Map map = req.getParameterMap();
-
-        log.info(map.toString());*/
-
-        String code = "";
-        return HttpResultDTO.ok(weiXinApiClient.redirectUriCode(code));
+        return weiXinApiClient.getAccountCode();
     }
 
 

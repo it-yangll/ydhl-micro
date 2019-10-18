@@ -3,6 +3,9 @@ package com.ydhl.micro.api.enpoint.admin.weixin;
 import com.ydhl.micro.api.dto.common.HttpResultDTO;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * @ClassName AuthenticationApi
@@ -15,12 +18,11 @@ public interface WeiXinApi {
 
     /** 获取微信Token */
     @RequestMapping(value = "gtewxtk", method = RequestMethod.GET)
-    HttpResultDTO gtewxtk();
+    HttpResultDTO getAccountCode() throws UnsupportedEncodingException;
 
-
-    /** 获取用户权限 */
-    @RequestMapping(value = "redirectUriCode", method = RequestMethod.GET)
-    HttpResultDTO redirectUriCode(String code);
+    /** 获取微信用户Id */
+    @RequestMapping(value = "getWXUserInfo", method = RequestMethod.GET)
+    HttpResultDTO getWXUserInfo(@RequestParam("code") final String code, @RequestParam("state") final String state);
 
 
 

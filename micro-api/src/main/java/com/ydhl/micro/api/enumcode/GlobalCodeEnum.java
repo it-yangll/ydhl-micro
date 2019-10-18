@@ -45,6 +45,8 @@ public enum GlobalCodeEnum implements CodeEnumClass {
 
     ERR_WX_ACCESS_TOKEN("G607", "微信认证异常"),
 
+    ERR_WX_ACCESS_USERID_TOKEN("G608", "微信获取用户ID认证异常"),
+
     ERR_INCOMPLETE("G500", "数据不完整"),
 
     ERR_TYPE_MISMATCH("G500", "数据类型匹配错误"),

@@ -7,7 +7,8 @@ spring:
     database: 0
     host: 127.0.0.1
     port: 6379
-    password: P51Yt4lqLoGF3Iea
+    password:
+    #password: P51Yt4lqLoGF3Iea
     jedis:
       pool:
         #最大连接数
@@ -30,3 +31,11 @@ upload:
   dir: /opt/ydhl/heli/files
   # 访问路径
   url: http://heli.yibzt.com/files/
+
+#wx
+wx:
+  encodUrl: http://m3prfr.natappfree.cc/api/admin/public/MTAuthorization
+  litewx:
+    agentId: 1000021
+    corpid: wx6a926e35be324c15
+    corpsecret: aorBy73LOiI2mWE670qLajVH8bkm0bxpv4hYBULH6Ao

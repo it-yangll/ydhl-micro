@@ -1,9 +1,11 @@
 package com.ydhl.micro.base.weixin;
 
+import com.ydhl.micro.api.dto.admin.sys.login.ResponseLoginDTO;
 import com.ydhl.micro.api.dto.liteapp.member.ResponseWxSessionDTO;
-import com.ydhl.micro.api.dto.mall.member.CaptchaDTO;
 import com.ydhl.micro.base.weixin.dto.BindWxDTO;
 import org.springframework.http.ResponseEntity;
+
+import java.io.UnsupportedEncodingException;
 
 
 /**
@@ -15,23 +17,17 @@ import org.springframework.http.ResponseEntity;
  **/
 public interface WeChatService {
 
-    /** 账号密码登录 */
-    //ResponseLoginDTO login(LoginMallDTO dto);
-
-    /** 微信授权手机号登录 */
-    //ResponseLoginDTO wxLogin(WxLoginAppDTO dto);
-
     /** 后台获取微信openId绑定账号 */
     ResponseWxSessionDTO bindWx(BindWxDTO dto);
 
-    /** 驾驶舱发送验证码 */
-    void captcha(CaptchaDTO dto);
+    /** 获取微信用户code 5分钟内有效 */
+    ResponseEntity<String> getAccountCode() throws UnsupportedEncodingException;
 
-    /** 获取微信Token */
-    ResponseEntity<String> getAccountToken();
+    /** 获取网页重定向路径 */
+    String redirectWXAuthUrl();
 
-    /** 获取用户权限 */
-    String redirectUriCode(String code);
+    /** 获取微信用户ID信息 @param code @param state @return */
+    ResponseLoginDTO getWXUserInfo(String code, String state);
 
 
 }

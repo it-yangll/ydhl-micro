@@ -27,6 +27,8 @@ public enum AdminCodeEnum implements CodeEnumClass {
     ERR_USER_NAME_REPEAT("A0014", "用户名称已存在"),
     ERR_MALL_FROZEN_REPEAT("M001", "只允许操作正常会员"),
     ERR_MALL_NORMAL_REPEAT("M002", "只允许操作冻结会员"),
+    ERR_WX_USER_REPEAT("W001", "获取当前微信用户信息异常"),
+    ERR_WX_PERMISSION_NOT_OPEN("W002", "权限未开放请联系管理员"),
 
     ERR_UPDATE_STATE("G001", "商品已上架且已出售不允许此操作."),
     ERR_UPPER_UPDATE_STATE("G002", "促销商品已上架或已促销不允许此操作."),
