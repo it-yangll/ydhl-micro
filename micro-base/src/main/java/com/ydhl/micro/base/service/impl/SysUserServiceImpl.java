@@ -78,9 +78,9 @@ public class SysUserServiceImpl implements SysUserService {
         if (user.getDeptId() != null) {
             responseUserDTO.setDeptName(cacheHelper.getDept(user.getDeptId()).getName());
         }
-        if (user.getPostId() != null) {
+        /*if (user.getPostId() != null) {
             responseUserDTO.setPostName(cacheHelper.getDictItemById(user.getPostId()).getItemValue());
-        }
+        }*/
         responseUserDTO.setStateName(State.valueOf(user.getState()).getShowText());
         responseUserDTO.setPresetName(user.getPreset() ? "是" : "否");
         responseUserDTO.setUserTypeName(UserType.valueOf(user.getUserType()).getShowText());

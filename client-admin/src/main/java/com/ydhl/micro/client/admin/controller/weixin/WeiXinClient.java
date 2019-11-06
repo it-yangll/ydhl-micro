@@ -61,6 +61,15 @@ public class WeiXinClient {
     @ApiModelProperty(value = "获取当前微信登录用户角色权限")
     @RequestMapping(value = "/public/MTAuthorization")
     @ResponseBody
+    public HttpResultDTO authorizationWx(HttpServletRequest request, HttpSession session) {
+        String code= request.getParameter("code");
+        String state=request.getParameter("state");
+        return weiXinApiClient.getWXUserInfo(code,state);
+    }
+
+    @ApiModelProperty(value = "获取当前微信登录用户角色权限,保留接口")
+    @RequestMapping(value = "/public/MTAuthorizationRetain")
+    @ResponseBody
     public HttpResultDTO mTAuthorization(HttpServletRequest request, HttpSession session) {
         String code= request.getParameter("code");
         String state=request.getParameter("state");

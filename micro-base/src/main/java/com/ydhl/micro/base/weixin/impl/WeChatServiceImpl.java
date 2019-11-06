@@ -110,6 +110,9 @@ public class WeChatServiceImpl implements WeChatService {
         }
         String body = accountCode.getBody();
         BeanWxDTO.UserInfo userInfo = BeanWxDTO.getUserInfoBody(body);
+        if(!userInfo.getErrcode().equals(0)){
+            throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_ACCESS_USERID_CODE, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_ACCESS_USERID_CODE));
+        }
         List<SysUser> sysUserList = sysUserService.searchByMobile(userInfo.getMobile());
         if(CollectionUtil.isNotEmpty(sysUserList)){
             ResponseLoginDTO result = new ResponseLoginDTO();
@@ -122,7 +125,6 @@ public class WeChatServiceImpl implements WeChatService {
             throw new SystemRuntimeException(AdminCodeEnum.ERR_WX_PERMISSION_NOT_OPEN, cacheHelper.msgTemplate(AdminCodeEnum.ERR_WX_PERMISSION_NOT_OPEN));
         }
     }
-
 
 
 

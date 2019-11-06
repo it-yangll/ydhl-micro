@@ -10,6 +10,7 @@ import com.ydhl.micro.api.dto.admin.sys.dict.ResponseDicitemDTO;
 import com.ydhl.micro.api.dto.admin.sys.resource.ResponseResourceDTO;
 import com.ydhl.micro.api.dto.admin.sys.role.ResponseRoleDTO;
 import com.ydhl.micro.api.dto.liteapp.member.WxCode2SessionDTO;
+import com.ydhl.micro.api.dto.liteapp.weixin.WXSecretBeanDto;
 import com.ydhl.micro.api.dto.liteapp.weixin.WXSecretDto;
 import com.ydhl.micro.api.dto.liteapp.weixin.WxBeanStringSuper;
 import com.ydhl.micro.api.enumcode.CodeEnumClass;
@@ -108,18 +109,26 @@ public class CacheHelper {
 
     /**
      * @param openId :微信openId
-     * @return com.ybzt.micro.api.dto.liteapp.member.WxCode2SessionDTO :
+     * @return com.ybzt.micro.api.dto.liteapp.member.WXSecretDto :
      * @Description //获取微信登录凭证
      * @Author yangll
      * @Date 2019-9-10 11:44:36
      **/
-    public WXSecretDto getWxAccessToken(String openId) {
+    public WXSecretBeanDto getWxAccessToken(String openId) {
+        String wXSecretBeanDto = stringRedisTemplate.opsForValue().get(RedisKeyConst.getWxSessionKey(openId));
+        if (StringUtils.isBlank(wXSecretBeanDto)) {
+            throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_CODE2SESSION, msgTemplate(GlobalCodeEnum.ERR_WX_CODE2SESSION));
+        }
+        return JSONObject.toJavaObject(JSONObject.parseObject(wXSecretBeanDto), WXSecretBeanDto.class);
+    }
+
+    /*public WXSecretDto getWxAccessToken(String openId) {
         String wxSecretDto = stringRedisTemplate.opsForValue().get(RedisKeyConst.getWxSessionKey(openId));
         if (StringUtils.isBlank(wxSecretDto)) {
             throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_CODE2SESSION, msgTemplate(GlobalCodeEnum.ERR_WX_CODE2SESSION));
         }
         return JSONObject.toJavaObject(JSONObject.parseObject(wxSecretDto), WXSecretDto.class);
-    }
+    }*/
 
     /**
      * @param openId            : 微信openId

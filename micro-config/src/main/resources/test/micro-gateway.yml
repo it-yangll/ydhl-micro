@@ -1,6 +1,10 @@
 server:
   port: 8085
 
+http:
+  encoding:
+    force: true
+
 welcome: micro-gateway-test
 
 logging:

@@ -1,6 +1,10 @@
 server:
   port: 20001
 
+http:
+  encoding:
+    force: true
+
 spring:
   redis:
     #数据库索引
@@ -34,7 +38,7 @@ upload:
 
 #wx
 wx:
-  encodUrl: http://m3prfr.natappfree.cc/api/admin/public/MTAuthorization
+  encodUrl: http://3h48xq.natappfree.cc/api/admin/public/MTAuthorization
   litewx:
     agentId: 1000021
     corpid: wx6a926e35be324c15

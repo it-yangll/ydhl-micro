@@ -1,6 +1,10 @@
 server:
   port: 30002
 
+http:
+  encoding:
+    force: true
+
 spring:
   jpa:
     generate-ddl: false
@@ -105,7 +109,7 @@ wx:
   #静默等了地址
   oauthCode: https://open.weixin.qq.com/connect/oauth2/authorize?appid={0}&redirect_uri={1}&response_type=code&scope=snsapi_userinfo&agentid={2}&state={3}#wechat_redirect
   #本地回调路径
-  encod: http://3acetr.natappfree.cc/api/admin/public/MTAuthorization
+  encod: http://coding.chinanorth.cloudapp.chinacloudapi.cn/api/admin/public/MTAuthorization
   #获取微信用户UserID
   user:
     oauthUserId: https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token={0}&code={1}

@@ -1,6 +1,7 @@
 package com.ydhl.micro.base.weixin.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.ydhl.micro.api.dto.liteapp.weixin.WXSecretBeanDto;
 import com.ydhl.micro.api.dto.liteapp.weixin.WXSecretDto;
 import com.ydhl.micro.api.enumcode.GlobalCodeEnum;
 import com.ydhl.micro.api.exception.SystemRuntimeException;
@@ -16,9 +17,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
+import javax.swing.*;
+import javax.swing.plaf.IconUIResource;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @ClassName WxConfigUtil
@@ -116,10 +121,29 @@ public class WxConfigUtil {
      */
     public ResponseEntity<String> getWxUserInfo(String code, String state){
         String accountCode = null;
-        WXSecretDto access_token = cacheHelper.getWxAccessToken(wxCorpid);
-        if(access_token.getErrcode() < 1){
+        WXSecretBeanDto access_token = cacheHelper.getWxAccessToken(wxCorpid);
+        if(!(Long.compare(access_token.getExpires_in(),System.currentTimeMillis()) > 0)){
+            log.info("==========================WXConfigUtil==============================");
+            log.info("====================================================================");
+            log.info("====================================================================");
+            log.info("====================================================================");
+            log.info("================================重==================================");
+            log.info("================================新==================================");
+            log.info("================================获==================================");
+            log.info("================================取==================================");
+            log.info("====================================================================");
+            log.info("====================================================================");
+            log.info("===========================:"+code+" :==============================");
+            log.info("===========================:"+state+" :=============================");
+            log.info("====================================================================");
+            log.info("====================================================================");
+            log.info("====================================================================");
+            log.info("====================================================================");
+            getAccountToken();
+            getWxUserInfo(code,state);
+        }else if(access_token.getErrcode() < 1){
             accountCode = access_token.getAccess_token();
-        }else{
+        }else {
             throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN));
         }
         //用户id获取
@@ -128,6 +152,9 @@ public class WxConfigUtil {
             throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_ACCESS_USERID_TOKEN, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_ACCESS_USERID_TOKEN));
         }
         BeanWxDTO userId = BeanWxDTO.getUserIdBody(wxResponse.getBody());
+        if(((BeanWxDTO.UserId) userId).getUserId() == null){
+            throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_ACCESS_USERID_USERID, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_ACCESS_USERID_USERID));
+        }
         cacheHelper.saveWXBeanString(((BeanWxDTO.UserId) userId).getUserId(), userId, tokenExpTime);
         //用户信息获取
         ResponseEntity<String> wxResponseUserInfo = restTemplate.getForEntity(oauthUserInfoUrl, String.class,accountCode,((BeanWxDTO.UserId) userId).getUserId());
@@ -136,6 +163,25 @@ public class WxConfigUtil {
         }
         return wxResponseUserInfo;
     }
+
+
+    public static void main(String[] args) {
+        long access_token = 7200l;
+
+        boolean bl = Long.compare(access_token,System.currentTimeMillis()) > 0;
+
+
+        System.out.println(bl);
+
+
+
+    }
+
+
+
+
+
+
 
 
     /**
@@ -171,6 +217,5 @@ public class WxConfigUtil {
             throw new SystemRuntimeException(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN, cacheHelper.msgTemplate(GlobalCodeEnum.ERR_WX_ACCESS_TOKEN));
         }
     }
-
 
 }

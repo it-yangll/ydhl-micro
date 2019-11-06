@@ -1,6 +1,10 @@
 server:
   port: 8888
 
+http:
+  encoding:
+    force: true
+
 spring:
   application:
     name: micro-config
